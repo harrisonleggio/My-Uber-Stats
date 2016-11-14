@@ -50,5 +50,5 @@ cost_array = [float(x) for x in cost_array]
 
 total_cost = sum(cost_array)
 
-print total_cost
+print ("${}".format(total_cost))
 
