@@ -63,6 +63,8 @@ def Uber_Cost(email_address, password):
             #print final_cost2
             cost_array.append(final_cost2)
 
+    cost_array = list(set(cost_array))
+
     cost_array = [x.lstrip("$") for x in cost_array]
     cost_array = [float(x) for x in cost_array]
 
@@ -74,6 +76,7 @@ def Uber_Cost(email_address, password):
     print ("Most expensive ride: ${}".format(max_ride))
     print ("Least expensive ride: ${}".format(min_ride))
 
+    output.append('You have taken ' + str(len(cost_array)) + ' Uber rides' + '<br>')
     output.append('Total Uber Cost: ' + str(total_cost) + '<br>')
     output.append('Most Expensive Ride: ' + str(max_ride) + '<br>')
     output.append('Least Expensive Ride: ' + str(min_ride) + '<br>')
