@@ -1,70 +1,80 @@
-from flask import Flask, request, render_template, redirect, session, url_for
-from flask.json import jsonify
-import requests
-from requests_oauthlib import OAuth2Session
+from flask import Flask, request, render_template, url_for, session, Response, redirect
+from flask_oauth import OAuth
+
 import imaplib
 import email
 from bs4 import BeautifulSoup
 
+GOOGLE_CLIENT_ID = 'my client id'
+GOOGLE_CLIENT_SECRET = 'my secret id'
+REDIRECT_URI = '/authorized'  # one of the Redirect URIs from Google APIs console
+
+SECRET_KEY = 'Uber'
+DEBUG = True
+
 app = Flask(__name__)
 app.secret_key = 'Uber'
+oauth = OAuth()
 
-client_id = '838764710395-p7nk0fcig6cl27lhfs25l49sku98dfc4.apps.googleusercontent.com'
-client_secret = 'c0kLkqaVfGueyxBN4OkwImEH'
-redirect_uri = 'http://stackoverflow.com/questions/tagged/python'
-
-authorization_base_url = "https://accounts.google.com/o/oauth2/auth"
-token_url = "https://accounts.google.com/o/oauth2/token"
-refresh_url = token_url
-scope = [
-    "https://www.googleapis.com/auth/userinfo.email",
-    "https://www.googleapis.com/auth/userinfo.profile",
-]
-
-@app.route("/")
-def demo():
-    """Step 1: User Authorization.
-
-    Redirect the user/resource owner to the OAuth provider (i.e. Google)
-    using an URL with a few key OAuth parameters.
-    """
-    google = OAuth2Session(client_id, scope=scope, redirect_uri=redirect_uri)
-    authorization_url, state = google.authorization_url(authorization_base_url,
-        # offline for refresh token
-        # force to always make user click authorize
-        access_type="offline", approval_prompt="force")
-
-    # State is used to prevent CSRF, keep this for later.
-    session['oauth_state'] = state
-    return redirect(authorization_url)
-
-@app.route("/callback", methods=["GET"])
-def callback():
-    """ Step 3: Retrieving an access token.
-
-    The user has been redirected back from the provider to your registered
-    callback URL. With this redirection comes an authorization code included
-    in the redirect URL. We will use that to obtain an access token.
-    """
-
-    google = OAuth2Session(client_id, redirect_uri=redirect_uri,
-                           state=session['oauth_state'])
-    token = google.fetch_token(token_url, client_secret=client_secret,
-                               authorization_response=request.url)
-
-    # We use the session as a simple DB for this example.
-    session['oauth_token'] = token
-
-    print token
-
-    return redirect(url_for('.menu'))
+google = oauth.remote_app('google',
+                          base_url='https://www.google.com/accounts/',
+                          authorize_url='https://accounts.google.com/o/oauth2/auth',
+                          request_token_url=None,
+                          request_token_params={'scope': 'https://www.googleapis.com/auth/userinfo.email',
+                                                'response_type': 'code'},
+                          access_token_url='https://accounts.google.com/o/oauth2/token',
+                          access_token_method='POST',
+                          access_token_params={'grant_type': 'authorization_code'},
+                          consumer_key=GOOGLE_CLIENT_ID,
+                          consumer_secret=GOOGLE_CLIENT_SECRET)
 
 
-@app.route('/login', methods = ['POST'])
-def process():
-    email_address = request.form['email']
-    password = request.form['password']
-    return Uber_Cost(email_address, password)
+@app.route('/')
+def index():
+    access_token = session.get('access_token')
+    if access_token is None:
+        return redirect(url_for('login'))
+
+    access_token = access_token[0]
+    from urllib2 import Request, urlopen, URLError
+
+    headers = {'Authorization': 'OAuth '+access_token}
+    req = Request('https://www.googleapis.com/oauth2/v1/userinfo',
+                  None, headers)
+    try:
+        res = urlopen(req)
+    except URLError, e:
+        if e.code == 401:
+            # Unauthorized - bad token
+            session.pop('access_token', None)
+            return redirect(url_for('login'))
+        return res.read()
+    print access_token
+    return res.read()
+
+
+@app.route('/login')
+def login():
+    callback=url_for('authorized', _external=True)
+    return google.authorize(callback=callback)
+
+
+
+@app.route(REDIRECT_URI)
+@google.authorized_handler
+def authorized(resp):
+    access_token = resp['access_token']
+    session['access_token'] = access_token, ''
+    return redirect(url_for('index'))
+
+
+@google.tokengetter
+def get_access_token():
+    return session.get('access_token')
+
+
+
+
 
 def Uber_Cost(email_address, password):
 
@@ -134,4 +144,4 @@ def Uber_Cost(email_address, password):
     return '\n'.join(output)
 
 if __name__ == "__main__":
-    app.run(debug=True, host='0.0.0.0')
+    app.run(debug=True)
