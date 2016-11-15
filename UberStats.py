@@ -72,6 +72,7 @@ def Uber_Cost(email_address, password):
     max_ride = max(cost_array)
     min_ride = min(cost_array)
 
+    print ("You've taken: {} Uber rides".format(len(cost_array)))
     print ("Trip total: ${}".format(total_cost))
     print ("Most expensive ride: ${}".format(max_ride))
     print ("Least expensive ride: ${}".format(min_ride))
