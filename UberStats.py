@@ -1,5 +1,7 @@
-from flask import Flask, request, render_template
-
+from flask import Flask, request, render_template, redirect, session, url_for
+from flask.json import jsonify
+import requests
+from requests_oauthlib import OAuth2Session
 import imaplib
 import email
 from bs4 import BeautifulSoup
@@ -7,9 +9,56 @@ from bs4 import BeautifulSoup
 app = Flask(__name__)
 app.secret_key = 'Uber'
 
-@app.route('/')
-def login():
-    return render_template('login.html')
+client_id = '838764710395-p7nk0fcig6cl27lhfs25l49sku98dfc4.apps.googleusercontent.com'
+client_secret = 'c0kLkqaVfGueyxBN4OkwImEH'
+redirect_uri = 'http://stackoverflow.com/questions/tagged/python'
+
+authorization_base_url = "https://accounts.google.com/o/oauth2/auth"
+token_url = "https://accounts.google.com/o/oauth2/token"
+refresh_url = token_url
+scope = [
+    "https://www.googleapis.com/auth/userinfo.email",
+    "https://www.googleapis.com/auth/userinfo.profile",
+]
+
+@app.route("/")
+def demo():
+    """Step 1: User Authorization.
+
+    Redirect the user/resource owner to the OAuth provider (i.e. Google)
+    using an URL with a few key OAuth parameters.
+    """
+    google = OAuth2Session(client_id, scope=scope, redirect_uri=redirect_uri)
+    authorization_url, state = google.authorization_url(authorization_base_url,
+        # offline for refresh token
+        # force to always make user click authorize
+        access_type="offline", approval_prompt="force")
+
+    # State is used to prevent CSRF, keep this for later.
+    session['oauth_state'] = state
+    return redirect(authorization_url)
+
+@app.route("/callback", methods=["GET"])
+def callback():
+    """ Step 3: Retrieving an access token.
+
+    The user has been redirected back from the provider to your registered
+    callback URL. With this redirection comes an authorization code included
+    in the redirect URL. We will use that to obtain an access token.
+    """
+
+    google = OAuth2Session(client_id, redirect_uri=redirect_uri,
+                           state=session['oauth_state'])
+    token = google.fetch_token(token_url, client_secret=client_secret,
+                               authorization_response=request.url)
+
+    # We use the session as a simple DB for this example.
+    session['oauth_token'] = token
+
+    print token
+
+    return redirect(url_for('.menu'))
+
 
 @app.route('/login', methods = ['POST'])
 def process():
