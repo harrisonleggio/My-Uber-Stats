@@ -7,8 +7,8 @@ from bs4 import BeautifulSoup
 
 
 
-GOOGLE_CLIENT_ID = '838764710395-p7nk0fcig6cl27lhfs25l49sku98dfc4.apps.googleusercontent.com'
-GOOGLE_CLIENT_SECRET = 'c0kLkqaVfGueyxBN4OkwImEH'
+GOOGLE_CLIENT_ID = '****'
+GOOGLE_CLIENT_SECRET = '****'
 REDIRECT_URI = '/authorized'  # one of the Redirect URIs from Google APIs console
 
 SECRET_KEY = 'Uber'
