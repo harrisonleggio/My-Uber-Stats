@@ -1,12 +1,14 @@
-from flask import Flask, request, render_template, url_for, session, Response, redirect
+from flask import Flask, request, url_for, session, redirect, jsonify
 from flask_oauth import OAuth
-
+import json
 import imaplib
 import email
 from bs4 import BeautifulSoup
 
-GOOGLE_CLIENT_ID = 'my client id'
-GOOGLE_CLIENT_SECRET = 'my secret id'
+
+
+GOOGLE_CLIENT_ID = '838764710395-p7nk0fcig6cl27lhfs25l49sku98dfc4.apps.googleusercontent.com'
+GOOGLE_CLIENT_SECRET = 'c0kLkqaVfGueyxBN4OkwImEH'
 REDIRECT_URI = '/authorized'  # one of the Redirect URIs from Google APIs console
 
 SECRET_KEY = 'Uber'
@@ -49,8 +51,10 @@ def index():
             session.pop('access_token', None)
             return redirect(url_for('login'))
         return res.read()
-    print access_token
-    return res.read()
+    j = json.loads(res.read())
+    email_address = j['email']
+    print email_address, access_token
+    return "Hello World"
 
 
 @app.route('/login')
@@ -75,8 +79,7 @@ def get_access_token():
 
 
 
-
-def Uber_Cost(email_address, password):
+def Uber_Cost(email_address, access_token):
 
     final_cost1 = ""
     final_cost2 = ""
@@ -86,7 +89,11 @@ def Uber_Cost(email_address, password):
 
 
     mail = imaplib.IMAP4_SSL('imap.gmail.com')
-    mail.login(email_address, password)
+    #mail.login(email_address, password)
+    auth_string = 'user=%s\1auth=Bearer %s\1\1' % (email_address, access_token)
+    mail.debug = 4
+    mail.authenticate('XOAUTH2', lambda x: auth_string)
+
 
     mail.list()
     mail.select('inbox')
@@ -144,4 +151,4 @@ def Uber_Cost(email_address, password):
     return '\n'.join(output)
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=True, threaded=True)
