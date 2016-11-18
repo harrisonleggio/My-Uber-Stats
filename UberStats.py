@@ -4,11 +4,14 @@ import json
 import imaplib
 import email
 from bs4 import BeautifulSoup
+import base64
 
 
 
-GOOGLE_CLIENT_ID = '****'
-GOOGLE_CLIENT_SECRET = '****'
+
+
+GOOGLE_CLIENT_ID = '***'
+GOOGLE_CLIENT_SECRET = '***'
 REDIRECT_URI = '/authorized'  # one of the Redirect URIs from Google APIs console
 
 SECRET_KEY = 'Uber'
@@ -22,8 +25,9 @@ google = oauth.remote_app('google',
                           base_url='https://www.google.com/accounts/',
                           authorize_url='https://accounts.google.com/o/oauth2/auth',
                           request_token_url=None,
-                          request_token_params={'scope': 'https://www.googleapis.com/auth/userinfo.email',
-                                                'response_type': 'code'},
+                          request_token_params={
+                              'scope': 'https://www.googleapis.com/auth/userinfo.email https://mail.google.com/',
+                              'response_type': 'code'},
                           access_token_url='https://accounts.google.com/o/oauth2/token',
                           access_token_method='POST',
                           access_token_params={'grant_type': 'authorization_code'},
@@ -54,7 +58,7 @@ def index():
     j = json.loads(res.read())
     email_address = j['email']
     print email_address, access_token
-    return "Hello World"
+    return Uber_Cost(email_address, access_token)
 
 
 @app.route('/login')
@@ -77,9 +81,24 @@ def get_access_token():
     return session.get('access_token')
 
 
+def GenerateOAuth2String(username, access_token, base64_encode=True):
+    auth_string = 'user=%s\1auth=Bearer %s\1\1' % (username, access_token)
+    if base64_encode:
+        auth_string = base64.b64encode(auth_string)
+    return auth_string
+
+
 
 
 def Uber_Cost(email_address, access_token):
+
+    auth_string = GenerateOAuth2String(email_address, access_token, base64_encode=False)
+    print auth_string
+
+    mail = imaplib.IMAP4_SSL('imap.gmail.com')
+    mail.debug = 4
+    mail.authenticate('XOAUTH2', lambda x: auth_string)
+    mail.select('INBOX')
 
     final_cost1 = ""
     final_cost2 = ""
@@ -87,16 +106,6 @@ def Uber_Cost(email_address, access_token):
     cost_array = []
     output = []
 
-
-    mail = imaplib.IMAP4_SSL('imap.gmail.com')
-    #mail.login(email_address, password)
-    auth_string = 'user=%s\1auth=Bearer %s\1\1' % (email_address, access_token)
-    mail.debug = 4
-    mail.authenticate('XOAUTH2', lambda x: auth_string)
-
-
-    mail.list()
-    mail.select('inbox')
     result,data = mail.search(None, 'FROM', '"Uber Receipts"')
 
     ids = data[0]
@@ -123,10 +132,8 @@ def Uber_Cost(email_address, access_token):
             final_cost2 = row.text.lstrip().strip()
 
         if final_cost1 != "":
-            #print final_cost1
             cost_array.append(final_cost1)
         if final_cost2 != "":
-            #print final_cost2
             cost_array.append(final_cost2)
 
     cost_array = list(set(cost_array))
@@ -149,6 +156,8 @@ def Uber_Cost(email_address, access_token):
     output.append('Least Expensive Ride: ' + str(min_ride) + '<br>')
 
     return '\n'.join(output)
+
+
 
 if __name__ == "__main__":
     app.run(debug=True, threaded=True)
