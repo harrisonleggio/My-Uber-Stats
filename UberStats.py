@@ -1,4 +1,4 @@
-from flask import Flask, request, url_for, session, redirect, jsonify
+from flask import Flask, request, url_for, session, redirect, jsonify, render_template
 from flask_oauth import OAuth
 import json
 import imaplib
@@ -10,8 +10,8 @@ import base64
 
 
 
-GOOGLE_CLIENT_ID = '***'
-GOOGLE_CLIENT_SECRET = '***'
+GOOGLE_CLIENT_ID = '838764710395-p7nk0fcig6cl27lhfs25l49sku98dfc4.apps.googleusercontent.com'
+GOOGLE_CLIENT_SECRET = 'c0kLkqaVfGueyxBN4OkwImEH'
 REDIRECT_URI = '/authorized'  # one of the Redirect URIs from Google APIs console
 
 SECRET_KEY = 'Uber'
@@ -34,8 +34,11 @@ google = oauth.remote_app('google',
                           consumer_key=GOOGLE_CLIENT_ID,
                           consumer_secret=GOOGLE_CLIENT_SECRET)
 
-
 @app.route('/')
+def landing():
+    return render_template('index.html')
+
+@app.route('/google')
 def index():
     access_token = session.get('access_token')
     if access_token is None:
@@ -140,24 +143,71 @@ def Uber_Cost(email_address, access_token):
 
     cost_array = [x.lstrip("$") for x in cost_array]
     cost_array = [float(x) for x in cost_array]
-
+    
+    if len(cost_array) == 0:
+        return render_template('error.html')
+    
     total_cost = sum(cost_array)
     max_ride = max(cost_array)
     min_ride = min(cost_array)
+    
+    total_cost = round(total_cost, 2)
+    max_ride = round(max_ride, 2)
+    min_ride = round(min_ride, 2)
 
     print ("You've taken: {} Uber rides".format(len(cost_array)))
     print ("Trip total: ${}".format(total_cost))
     print ("Most expensive ride: ${}".format(max_ride))
     print ("Least expensive ride: ${}".format(min_ride))
+    
+    output.append('<html> \
+	<head> \
+		<title>Uber History</title> \
+		<meta charset="utf-8" /> \
+		<meta name="viewport" content="width=device-width, initial-scale=1" /> \
+		<link rel="stylesheet" href="static/main.css" /> \
+	</head> \
+	<body style="background-color:powderblue;"> \
+        <!-- Header --> \
+			<header id="header"> \
+			<nav class="left"> \
+            <a href="http://www.uber.com"> \
+        <img border="0" alt="W3Schools" \
+        src="https://fortunedotcom.files.wordpress.com/2016/02/rex.png" width="100" height="100"> \
+			</nav> \
+				<a href="/" class="logo">Uber History</a> \
+			<nav class="right"> \
+			<a href="#" class="content">Not affiliated with Uber.</a> \
+				</nav \
+			</header> \
+		<!-- Banner --> \
+			<section id="banner"> \
+				<div class="content"> \
+					<h1>Your ride history</h1><p>')
+
+
+    
 
     output.append('You have taken ' + str(len(cost_array)) + ' Uber rides' + '<br>')
-    output.append('Total Uber Cost: ' + str(total_cost) + '<br>')
-    output.append('Most Expensive Ride: ' + str(max_ride) + '<br>')
-    output.append('Least Expensive Ride: ' + str(min_ride) + '<br>')
+    output.append('Total Uber Cost: $' + str(total_cost) + '<br>')
+    output.append('Most Expensive Ride: $' + str(max_ride) + '<br>')
+    output.append('Least Expensive Ride: $' + str(min_ride) + '<br></p>')
+    
+    output.append('</div> \
+			</section> \
+        <!-- One --> \
+		<!-- Scripts --> \
+			<script src="assets/js/jquery.min.js"></script> \
+			<script src="assets/js/jquery.scrolly.min.js"></script> \
+			<script src="assets/js/skel.min.js"></script> \
+			<script src="assets/js/util.js"></script> \
+			<script src="assets/js/main.js"></script> \
+</body> \
+</html>')
 
     return '\n'.join(output)
 
 
 
 if __name__ == "__main__":
-    app.run(debug=True, threaded=True, host='0.0.0.0', port=80)
+    app.run(threaded=True, host='0.0.0.0', port=80)
