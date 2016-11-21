@@ -163,7 +163,7 @@ def Uber_Cost(email_address, access_token):
 		<meta name="viewport" content="width=device-width, initial-scale=1" /> \
 		<link rel="stylesheet" href="static/main.css" /> \
 	</head> \
-	<body style="background-color:powderblue;"> \
+	<body style="background-color:PowderBlue;"> \
         <!-- Header --> \
 			<header id="header"> \
 			<nav class="left"> \
@@ -180,13 +180,18 @@ def Uber_Cost(email_address, access_token):
 			<section id="banner"> \
 				<div class="content"> \
 					<h1>Your ride history</h1><p>')
+    output.append('<ul class="actions">')
+    output.append('<li><center><a href="/google" class="button scrolly">You have taken ' + str(len(cost_array)) + ' rides</a></center></li>')
+    output.append('<li><center><a href="/google" class="button scrolly">You have spent  $' + str(total_cost) + '</a></center></li>')
+    output.append('<li><center><a href="/google" class="button scrolly">Your average ride costs $' + str(average_ride) + '</a></center></li>')    
+    output.append('<li><center><a href="/google" class="button scrolly">Your most expensive ride was $ ' + str(max_ride) + '</a></center></li>')
+    output.append('<li><center><a href="/google" class="button scrolly">Your least expensive ride was $ ' + str(min_ride) + '</a></center></ul></li>')
 
-
-    output.append('You have taken ' + str(len(cost_array)) + ' Uber rides totaling $' 
+    """output.append('You have taken ' + str(len(cost_array)) + ' Uber rides totaling $' 
     + str(total_cost) + '<br>')
     output.append('Your average ride cost: $' + str(average_ride) + '<br>')
     output.append('Most Expensive Ride: $' + str(max_ride) + '<br>')
-    output.append('Least Expensive Ride: $' + str(min_ride) + '<br></p>')
+    output.append('Least Expensive Ride: $' + str(min_ride) + '<br></p>')"""
     output.append('</div> \
 			</section> \
         <!-- One --> \
