@@ -150,15 +150,11 @@ def Uber_Cost(email_address, access_token):
     total_cost = sum(cost_array)
     max_ride = max(cost_array)
     min_ride = min(cost_array)
-    
+    average_ride = total_cost/len(cost_array)
     total_cost = round(total_cost, 2)
     max_ride = round(max_ride, 2)
     min_ride = round(min_ride, 2)
-
-    print ("You've taken: {} Uber rides".format(len(cost_array)))
-    print ("Trip total: ${}".format(total_cost))
-    print ("Most expensive ride: ${}".format(max_ride))
-    print ("Least expensive ride: ${}".format(min_ride))
+    average_ride = round(average_ride, 2)
     
     output.append('<html> \
 	<head> \
@@ -186,13 +182,11 @@ def Uber_Cost(email_address, access_token):
 					<h1>Your ride history</h1><p>')
 
 
-    
-
-    output.append('You have taken ' + str(len(cost_array)) + ' Uber rides' + '<br>')
-    output.append('Total Uber Cost: $' + str(total_cost) + '<br>')
+    output.append('You have taken ' + str(len(cost_array)) + ' Uber rides totaling $' 
+    + str(total_cost) + '<br>')
+    output.append('Your average ride cost: $' + str(average_ride) + '<br>')
     output.append('Most Expensive Ride: $' + str(max_ride) + '<br>')
     output.append('Least Expensive Ride: $' + str(min_ride) + '<br></p>')
-    
     output.append('</div> \
 			</section> \
         <!-- One --> \
