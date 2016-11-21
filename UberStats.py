@@ -184,8 +184,8 @@ def Uber_Cost(email_address, access_token):
     output.append('<li><center><a href="/google" class="button scrolly">You have taken ' + str(len(cost_array)) + ' rides</a></center></li>')
     output.append('<li><center><a href="/google" class="button scrolly">You have spent  $' + str(total_cost) + '</a></center></li>')
     output.append('<li><center><a href="/google" class="button scrolly">Your average ride costs $' + str(average_ride) + '</a></center></li>')    
-    output.append('<li><center><a href="/google" class="button scrolly">Your most expensive ride was $ ' + str(max_ride) + '</a></center></li>')
-    output.append('<li><center><a href="/google" class="button scrolly">Your least expensive ride was $ ' + str(min_ride) + '</a></center></ul></li>')
+    output.append('<li><center><a href="/google" class="button scrolly">Your most expensive ride was $' + str(max_ride) + '</a></center></li>')
+    output.append('<li><center><a href="/google" class="button scrolly">Your least expensive ride was $' + str(min_ride) + '</a></center></ul></li>')
 
     """output.append('You have taken ' + str(len(cost_array)) + ' Uber rides totaling $' 
     + str(total_cost) + '<br>')
