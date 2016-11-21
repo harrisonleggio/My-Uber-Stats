@@ -7,7 +7,7 @@ from bs4 import BeautifulSoup
 import base64
 
 
-
+total = 0
 
 
 GOOGLE_CLIENT_ID = '838764710395-p7nk0fcig6cl27lhfs25l49sku98dfc4.apps.googleusercontent.com'
@@ -156,6 +156,18 @@ def Uber_Cost(email_address, access_token):
     min_ride = round(min_ride, 2)
     average_ride = round(average_ride, 2)
     
+    file = open('total.txt', 'a+')
+    file.write(str(total_cost) + '\n')
+    file.close()
+    with open('total.txt') as f:
+        data = f.readlines()
+        data = [line.strip() for line in data]
+        data = [float(x) for x in data]
+    
+    public_total = sum(data)
+    public_total = round(public_total, 2)
+    
+    
     output.append('<html> \
 	<head> \
 		<title>Uber History</title> \
@@ -186,7 +198,7 @@ def Uber_Cost(email_address, access_token):
     output.append('<li><center><a href="/google#" class="button scrolly">Your average ride costs $' + str(average_ride) + '</a></center></li>')    
     output.append('<li><center><a href="/google#" class="button scrolly">Your most expensive ride was $' + str(max_ride) + '</a></center></li>')
     output.append('<li><center><a href="/google#" class="button scrolly">Your least expensive ride was $' + str(min_ride) + '</a></center></ul></li>')
-
+    output.append('<li><center><a href="/google#" class="button scrolly">Uber History has scanned $' + str(public_total) + ' worth of Uber Rides</a></center></ul></li>')
     """output.append('You have taken ' + str(len(cost_array)) + ' Uber rides totaling $' 
     + str(total_cost) + '<br>')
     output.append('Your average ride cost: $' + str(average_ride) + '<br>')
