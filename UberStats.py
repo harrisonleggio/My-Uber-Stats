@@ -162,7 +162,9 @@ def Uber_Cost(email_address, access_token):
     with open('total.txt') as f:
         data = f.readlines()
         data = [line.strip() for line in data]
+        data = filter(None, data)
         data = [float(x) for x in data]
+        data = list(set(data))
     
     public_total = sum(data)
     public_total = round(public_total, 2)
@@ -179,9 +181,7 @@ def Uber_Cost(email_address, access_token):
         <!-- Header --> \
 			<header id="header"> \
 			<nav class="left"> \
-            <a href="http://www.uber.com"> \
-        <img border="0" alt="W3Schools" \
-        src="https://fortunedotcom.files.wordpress.com/2016/02/rex.png" width="100" height="100"> \
+                        <a href="mailto:harrison@uberhistory.com">Want your ad to be seen here? Contact harrison@uberhistory.com</a> \
 			</nav> \
 				<a href="/" class="logo">Uber History</a> \
 			<nav class="right"> \
@@ -198,7 +198,7 @@ def Uber_Cost(email_address, access_token):
     output.append('<li><center><a href="/google#" class="button scrolly">Your average ride costs $' + str(average_ride) + '</a></center></li>')    
     output.append('<li><center><a href="/google#" class="button scrolly">Your most expensive ride was $' + str(max_ride) + '</a></center></li>')
     output.append('<li><center><a href="/google#" class="button scrolly">Your least expensive ride was $' + str(min_ride) + '</a></center></ul></li>')
-    output.append('<li><center><a href="/google#" class="button scrolly">Uber History has scanned $' + str(public_total) + ' worth of Uber Rides</a></center></ul></li>')
+    output.append('<li><center><a href="/google#" class="button scrolly">Uber History users have spent $' + str(public_total) + '  on Uber Rides</a></center></ul></li>')
     """output.append('You have taken ' + str(len(cost_array)) + ' Uber rides totaling $' 
     + str(total_cost) + '<br>')
     output.append('Your average ride cost: $' + str(average_ride) + '<br>')
@@ -207,13 +207,7 @@ def Uber_Cost(email_address, access_token):
     output.append('</div> \
 			</section> \
         <!-- One --> \
-		<!-- Scripts --> \
-			<script src="assets/js/jquery.min.js"></script> \
-			<script src="assets/js/jquery.scrolly.min.js"></script> \
-			<script src="assets/js/skel.min.js"></script> \
-			<script src="assets/js/util.js"></script> \
-			<script src="assets/js/main.js"></script> \
-</body> \
+	</body> \
 </html>')
 
     return '\n'.join(output)
